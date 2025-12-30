@@ -1,0 +1,13 @@
+torch
+torchvision
+torchaudio
+transformers
+peft
+datasets
+accelerate
+fastapi
+uvicorn
+pillow
+scikit-learn
+evaluate
+python-dotenv
