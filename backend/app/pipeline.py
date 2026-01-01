@@ -94,3 +94,116 @@ def run_multi_image_pipeline(
         },
         debug
     )
+
+
+
+### NEW CODE
+# from typing import List, Dict, Any, Tuple, Optional
+# from PIL import Image
+
+# from .utils import (
+#     infer_scene,
+#     make_title_from_caption,
+#     make_description_from_caption,
+#     make_hashtags
+# )
+
+# SUGGESTIONS = [
+#     "Try clearer images with better lighting.",
+#     "Avoid screenshots or text-heavy images.",
+#     "Natural moments work best."
+# ]
+
+# def run_multi_image_pipeline(
+#     images: List[Image.Image],
+#     caption_fn,
+#     mode: str = "general",
+#     travel_probs: Optional[List[float]] = None,
+#     travel_threshold: float = 0.60,
+#     platform: str = ""
+# ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+#     """
+#     Final caption pipeline.
+#     """
+
+#     if travel_probs is None:
+#         travel_probs = [1.0] * len(images)
+
+#     # -----------------------------
+#     # RAW CAPTIONS (AI OUTPUT)
+#     # -----------------------------
+#     raw_captions: List[str] = []
+#     for img in images:
+#         try:
+#             raw_captions.append(caption_fn(img))
+#         except Exception:
+#             continue
+
+#     if not raw_captions:
+#         return (
+#             {
+#                 "valid": False,
+#                 "message": "Could not understand the images.",
+#                 "suggestions": SUGGESTIONS
+#             },
+#             {}
+#         )
+
+#     merged_caption = " ".join(raw_captions)
+
+#     # -----------------------------
+#     # OPTIONAL TRAVEL VALIDATION
+#     # -----------------------------
+#     if mode == "travel":
+#         valid_count = sum(p >= travel_threshold for p in travel_probs)
+#         travel_ratio = valid_count / max(len(travel_probs), 1)
+
+#         if travel_ratio < travel_threshold:
+#             return (
+#                 {
+#                     "valid": False,
+#                     "mode": mode,
+#                     "message": "These images do not appear to be travel related.",
+#                     "suggestions": SUGGESTIONS
+#                 },
+#                 {
+#                     "travel_ratio": travel_ratio
+#                 }
+#             )
+
+#     # -----------------------------
+#     # SEMANTIC ANALYSIS
+#     # -----------------------------
+#     scene = infer_scene(merged_caption)
+
+#     analysis = {
+#         "scene": scene,
+#         "images_used": len(images),
+#     }
+
+#     # -----------------------------
+#     # HUMAN OUTPUT (RAW-CAPTION DRIVEN)
+#     # -----------------------------
+#     title = make_title_from_caption(merged_caption)
+#     description = make_description_from_caption(merged_caption, mode)
+#     hashtags = make_hashtags(scene)
+
+#     # Platform tweaks
+#     platform = (platform or "").lower().strip()
+#     if platform == "linkedin":
+#         hashtags = hashtags[:5]
+#     elif platform == "facebook":
+#         hashtags = hashtags[:8]
+
+#     return (
+#         {
+#             "valid": True,
+#             "mode": mode,
+#             "title": title,
+#             "description": description,
+#             "hashtags": hashtags,
+#             "raw_caption": merged_caption,
+#             "analysis": analysis,
+#         },
+#         analysis
+#     )

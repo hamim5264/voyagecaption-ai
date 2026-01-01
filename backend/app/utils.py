@@ -99,3 +99,92 @@ def make_hashtags(captions: List[str], keywords: List[str], limit: int = 15) -> 
             out.append(t)
 
     return out[:limit]
+
+
+### NEW CODE
+# import re
+# from typing import List
+
+# # -----------------------------
+# # CLEAN TEXT
+# # -----------------------------
+# def clean_sentence(text: str) -> str:
+#     text = text.strip()
+#     if not text:
+#         return ""
+#     text = text[0].upper() + text[1:]
+#     if not text.endswith("."):
+#         text += "."
+#     return text
+
+
+# # -----------------------------
+# # SCENE INFERENCE (LIGHTWEIGHT)
+# # -----------------------------
+# def infer_scene(caption: str) -> str:
+#     c = caption.lower()
+
+#     if any(k in c for k in ["hospital", "patient", "medical", "oxygen", "bed"]):
+#         return "medical"
+#     if any(k in c for k in ["mountain", "beach", "desert", "forest", "hiking", "sunset"]):
+#         return "travel"
+#     if any(k in c for k in ["people", "friends", "group", "crowd"]):
+#         return "social"
+#     if any(k in c for k in ["sad", "cry", "emotional", "tear"]):
+#         return "emotional"
+
+#     return "general"
+
+
+# # -----------------------------
+# # TITLE FROM RAW CAPTION
+# # -----------------------------
+# def make_title_from_caption(raw_caption: str) -> str:
+#     """
+#     Converts raw caption into a short, human-readable title.
+#     """
+#     words = re.findall(r"[a-zA-Z]+", raw_caption)
+#     if not words:
+#         return "A Captured Moment"
+
+#     # Keep it short: 3–5 words
+#     title_words = words[:5]
+#     return " ".join(title_words).title()
+
+
+# # -----------------------------
+# # DESCRIPTION FROM RAW CAPTION
+# # -----------------------------
+# def make_description_from_caption(raw_caption: str, mode: str = "general") -> str:
+#     base = clean_sentence(raw_caption)
+#     mode = mode.lower()
+
+#     if mode == "travel":
+#         return base + " It captures the calm, freedom, and beauty that travel often brings."
+#     if mode == "emotional":
+#         return base + " There is a quiet emotion in this moment that feels deeply personal."
+#     if mode == "social":
+#         return base + " Moments like these are best when they are shared."
+#     if mode == "medical":
+#         return base + " A moment of strength, patience, and quiet resilience."
+
+#     # general
+#     return base + " A moment that feels natural, unposed, and real."
+
+
+# # -----------------------------
+# # HASHTAGS FROM SCENE
+# # -----------------------------
+# def make_hashtags(scene: str, limit: int = 12) -> List[str]:
+#     base = ["#photography", "#moments", "#storytelling"]
+
+#     scene_tags = {
+#         "travel": ["#travel", "#wanderlust", "#nature"],
+#         "emotional": ["#emotions", "#feelings"],
+#         "social": ["#people", "#life"],
+#         "medical": ["#strength", "#healing"],
+#         "general": ["#life", "#capture"],
+#     }
+
+#     tags = base + scene_tags.get(scene, [])
+#     return tags[:limit]

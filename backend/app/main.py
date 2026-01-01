@@ -86,3 +86,91 @@ async def generate_caption(
 
     # Return response (debug available internally if you want later)
     return CaptionResponse(**result)
+
+
+### NEW CODE
+# from fastapi import FastAPI, UploadFile, File, Form
+# from fastapi.middleware.cors import CORSMiddleware
+# from typing import List
+# from PIL import Image
+# from io import BytesIO
+
+# from .schemas import CaptionResponse
+# from .models import load_models
+# from .pipeline import run_multi_image_pipeline
+
+# app = FastAPI(title="Visual Caption Engine", version="2.0.0")
+
+# # -------------------------
+# # CORS
+# # -------------------------
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+# # -------------------------
+# # GLOBAL MODELS
+# # -------------------------
+# travel_clf = None
+# caption_gen = None
+
+# @app.on_event("startup")
+# def startup():
+#     global travel_clf, caption_gen
+#     travel_clf, caption_gen = load_models()
+
+# @app.get("/health")
+# def health():
+#     return {"status": "ok"}
+
+# # -------------------------
+# # MAIN ENDPOINT
+# # -------------------------
+# @app.post("/generate-caption", response_model=CaptionResponse)
+# async def generate_caption(
+#     images: List[UploadFile] = File(...),
+#     mode: str = Form("general"),
+# ):
+#     if caption_gen is None:
+#         return CaptionResponse(
+#             valid=False,
+#             message="Models not loaded.",
+#             suggestions=["Restart the server."]
+#         )
+
+#     pil_images = []
+#     for f in images:
+#         try:
+#             img = Image.open(BytesIO(await f.read())).convert("RGB")
+#             pil_images.append(img)
+#         except Exception:
+#             continue
+
+#     if not pil_images:
+#         return CaptionResponse(
+#             valid=False,
+#             message="No valid images received.",
+#             suggestions=["Upload JPG or PNG images."]
+#         )
+
+#     # -------------------------
+#     # Travel validation only if needed
+#     # -------------------------
+#     if mode == "travel" and travel_clf is not None:
+#         travel_probs = travel_clf.predict_proba(pil_images)
+#     else:
+#         # Non-travel modes: assume all valid
+#         travel_probs = [1.0] * len(pil_images)
+
+#     result, _ = run_multi_image_pipeline(
+#         images=pil_images,
+#         mode=mode,
+#         caption_fn=caption_gen.caption,
+#         travel_probs=travel_probs
+#     )
+
+#     return CaptionResponse(**result)
