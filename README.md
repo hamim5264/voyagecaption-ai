@@ -216,6 +216,21 @@ Commercial usage depends on model and dataset licenses.
 - Docker setup
 - Production deployment (Render / Railway)
 
+### Screnshots
+<img width="3375" height="3375" alt="5" src="https://github.com/user-attachments/assets/717398e2-df3e-4f4a-a152-bf2eb5b8c01b" />
+<img width="3375" height="3375" alt="4" src="https://github.com/user-attachments/assets/9a3118f0-ea25-42bd-b6c1-6c63ec6bf0ab" />
+<img width="3375" height="3375" alt="3" src="https://github.com/user-attachments/assets/0afebdcd-92b7-4a4d-999f-7d631d0e8ced" />
+<img width="3375" height="3375" alt="2" src="https://github.com/user-attachments/assets/3d6f913b-2184-4a49-acab-a9ae85a7099a" />
+<img width="3375" height="3375" alt="1" src="https://github.com/user-attachments/assets/bff8a3d4-83e7-4390-a2ab-55ed144e8c98" />
+<img width="1080" height="2400" alt="Screenshot_20260103_160323" src="https://github.com/user-attachments/assets/081c366f-94de-4abf-a820-43fbb84e4fa8" />
+<img width="1080" height="2400" alt="Screenshot_20260103_160312" src="https://github.com/user-attachments/assets/786b0902-1cdf-4f09-83f9-b270a7aa4757" />
+<img width="1080" height="2400" alt="Screenshot_20260103_160304" src="https://github.com/user-attachments/assets/2e0460d2-5e03-4944-a08f-4ff8cfa8472a" />
+<img width="1080" height="2400" alt="Screenshot_20260103_160225" src="https://github.com/user-attachments/assets/2f35c846-a1e5-421c-bdd4-03dcb697bc3e" />
+<img width="1080" height="2400" alt="Screenshot_20260103_155059" src="https://github.com/user-attachments/assets/bdb0b5db-45de-487f-952a-4f4c15a97946" />
+<img width="1080" height="2400" alt="Screenshot_20260103_154644" src="https://github.com/user-attachments/assets/e5687030-4c72-4a25-8b09-b747131e8898" />
+
+
+
 
 
 
