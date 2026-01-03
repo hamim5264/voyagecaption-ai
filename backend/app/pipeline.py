@@ -1,14 +1,110 @@
+# from typing import List, Dict, Any, Tuple
+# from PIL import Image
+
+# from .utils import extract_keywords, make_title_from_keywords, make_description, make_hashtags
+
+# SUGGESTIONS = [
+#     "Try outdoor scenery (mountains, beaches, forests, roads).",
+#     "Avoid screenshots, documents, or indoor-only photos.",
+#     "Landmarks and wide landscape shots work best.",
+#     "Upload clearer images with good lighting."
+# ]
+
+# def run_multi_image_pipeline(
+#     images: List[Image.Image],
+#     platform: str,
+#     tone: str,
+#     context: str,
+#     user_title: str,
+#     user_description: str,
+#     travel_probs: List[float],
+#     caption_fn,
+#     travel_threshold: float = 0.60
+# ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+#     """
+#     caption_fn: function(Image)->str from caption model
+#     Returns (response_dict, debug_dict)
+#     """
+#     per_img = []
+#     is_travel_flags = []
+#     for i, p in enumerate(travel_probs):
+#         is_travel = p >= 0.5
+#         is_travel_flags.append(is_travel)
+#         per_img.append({"index": i, "travel_prob": float(p), "is_travel": bool(is_travel)})
+
+#     travel_ratio = sum(is_travel_flags) / max(len(is_travel_flags), 1)
+
+#     debug = {
+#         "per_image": per_img,
+#         "travel_ratio": float(travel_ratio),
+#     }
+
+#     if travel_ratio < travel_threshold:
+#         return (
+#             {
+#                 "valid": False,
+#                 "message": "This doesn't look like travel photos.",
+#                 "suggestions": SUGGESTIONS
+#             },
+#             debug
+#         )
+
+#     # Generate per-image captions for travel images only
+#     captions = []
+#     for img, ok in zip(images, is_travel_flags):
+#         if ok:
+#             captions.append(caption_fn(img))
+
+#     if not captions:
+#         return (
+#             {
+#                 "valid": False,
+#                 "message": "Could not generate captions from the provided photos.",
+#                 "suggestions": SUGGESTIONS
+#             },
+#             debug
+#         )
+
+#     # Merge into one final output
+#     keywords = extract_keywords(captions, top_k=8)
+
+#     # If user_title is provided, respect it; else auto title
+#     title = user_title.strip() if user_title.strip() else make_title_from_keywords(keywords)
+
+#     # Description: merged + optional context/user_description
+#     desc = make_description(captions, keywords, tone=tone, context=context, user_desc=user_description)
+
+#     # Hashtags: from captions + keywords
+#     hashtags = make_hashtags(captions, keywords, limit=15)
+
+#     # Small platform tweak (optional)
+#     platform = (platform or "").lower().strip()
+#     if platform == "linkedin":
+#         # LinkedIn: fewer hashtags usually
+#         hashtags = hashtags[:7]
+#     elif platform == "facebook":
+#         hashtags = hashtags[:10]
+
+#     return (
+#         {
+#             "valid": True,
+#             "title": title,
+#             "description": desc,
+#             "hashtags": hashtags
+#         },
+#         debug
+#     )
+
+
 from typing import List, Dict, Any, Tuple
 from PIL import Image
 
-from .utils import extract_keywords, make_title_from_keywords, make_description, make_hashtags
-
-SUGGESTIONS = [
-    "Try outdoor scenery (mountains, beaches, forests, roads).",
-    "Avoid screenshots, documents, or indoor-only photos.",
-    "Landmarks and wide landscape shots work best.",
-    "Upload clearer images with good lighting."
-]
+from .utils import (
+    extract_keywords,
+    make_title_from_keywords,
+    make_description,
+    make_hashtags,
+)
 
 def run_multi_image_pipeline(
     images: List[Image.Image],
@@ -17,85 +113,96 @@ def run_multi_image_pipeline(
     context: str,
     user_title: str,
     user_description: str,
-    travel_probs: List[float],
+    travel_probs: List[float],  # kept for future use
     caption_fn,
-    travel_threshold: float = 0.60
+    travel_threshold: float = 0.0,  # unused now
 ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """
-    caption_fn: function(Image)->str from caption model
-    Returns (response_dict, debug_dict)
+    Caption-first pipeline.
+    No travel validation.
+    Always generate captions.
     """
-    per_img = []
-    is_travel_flags = []
-    for i, p in enumerate(travel_probs):
-        is_travel = p >= 0.5
-        is_travel_flags.append(is_travel)
-        per_img.append({"index": i, "travel_prob": float(p), "is_travel": bool(is_travel)})
 
-    travel_ratio = sum(is_travel_flags) / max(len(is_travel_flags), 1)
+    # -------------------------
+    # 1️⃣ GENERATE RAW CAPTIONS
+    # -------------------------
+    captions: List[str] = []
 
-    debug = {
-        "per_image": per_img,
-        "travel_ratio": float(travel_ratio),
-    }
-
-    if travel_ratio < travel_threshold:
-        return (
-            {
-                "valid": False,
-                "message": "This doesn't look like travel photos.",
-                "suggestions": SUGGESTIONS
-            },
-            debug
-        )
-
-    # Generate per-image captions for travel images only
-    captions = []
-    for img, ok in zip(images, is_travel_flags):
-        if ok:
+    for img in images:
+        try:
             captions.append(caption_fn(img))
+        except Exception:
+            continue
 
     if not captions:
         return (
             {
                 "valid": False,
-                "message": "Could not generate captions from the provided photos.",
-                "suggestions": SUGGESTIONS
+                "message": "Could not generate captions from images.",
+                "suggestions": ["Try clearer images with better lighting."],
             },
-            debug
+            {},
         )
 
-    # Merge into one final output
+    # -------------------------
+    # 2️⃣ KEYWORD EXTRACTION
+    # -------------------------
     keywords = extract_keywords(captions, top_k=8)
 
-    # If user_title is provided, respect it; else auto title
-    title = user_title.strip() if user_title.strip() else make_title_from_keywords(keywords)
+    # -------------------------
+    # 3️⃣ TITLE
+    # -------------------------
+    title = (
+        user_title.strip()
+        if user_title.strip()
+        else make_title_from_keywords(keywords)
+    )
 
-    # Description: merged + optional context/user_description
-    desc = make_description(captions, keywords, tone=tone, context=context, user_desc=user_description)
+    # -------------------------
+    # 4️⃣ DESCRIPTION
+    # -------------------------
+    description = make_description(
+        captions=captions,
+        keywords=keywords,
+        tone=tone,
+        context=context,
+        user_desc=user_description,
+    )
 
-    # Hashtags: from captions + keywords
+    # -------------------------
+    # 5️⃣ HASHTAGS
+    # -------------------------
     hashtags = make_hashtags(captions, keywords, limit=15)
 
-    # Small platform tweak (optional)
-    platform = (platform or "").lower().strip()
+    # Platform tuning
+    platform = (platform or "").lower()
     if platform == "linkedin":
-        # LinkedIn: fewer hashtags usually
-        hashtags = hashtags[:7]
+        hashtags = hashtags[:6]
     elif platform == "facebook":
         hashtags = hashtags[:10]
 
+    # -------------------------
+    # 6️⃣ DEBUG (OPTIONAL)
+    # -------------------------
+    debug = {
+        "images_used": len(images),
+        "captions_generated": len(captions),
+        "keywords": keywords,
+    }
+
+    # -------------------------
+    # 7️⃣ FINAL RESPONSE
+    # -------------------------
     return (
         {
             "valid": True,
             "title": title,
-            "description": desc,
-            "hashtags": hashtags
+            "description": description,
+            "hashtags": hashtags,
+            "debug": debug,
         },
-        debug
+        debug,
     )
-
-
 
 ### NEW CODE
 # from typing import List, Dict, Any, Tuple, Optional
